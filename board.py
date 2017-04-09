@@ -6,110 +6,116 @@ class Board:
 	APPLE = "a"
 	EMPTY = "."
 
+	field = []
 	snake = []
 	score = 0
 	apple = (-1, -1)
 	gameOver = False
+	size = 0
 
 	# Create new Board
-	def __init__(self, size):
-		gameOver = False
-		snake.push((0,0))
-		dropApple()
-		updateField()
-
 	def __init__(self, board):
+		if isinstance(board, Board):
+			self.initInProgress(board)
+		else:
+			self.size = board
+			self.snake.append((0,0))
+			self.emptyField()
+			self.dropApple()
+			self.updateField()
+
+	def initInProgress(self, board) :
+		self.size = size;
 		self.field = board.field
 		self.snake = board.snake
 		self.score = board.score
 		self.apple = board.apple
 
-	def emptyField():
-		field = [[EMPTY for w in range(size)] for h in range(size)]
+	def emptyField(self):
+		self.field = [[self.EMPTY for w in range(self.size)] for h in range(self.size)]
 
 	# Updates the field matrix to accurately hold snake & Apple
-	def updateField():
-		emptyField()
-		field[apple[0]][apple[1]] = APPLE
-		for piece in snake:
-			field[piece[0]][piece[1]] = SNAKE
+	def updateField(self):
+		self.emptyField()
+		self.field[self.apple[0]][self.apple[1]] = self.APPLE
+		for piece in self.snake:
+			self.field[piece[0]][piece[1]] = self.SNAKE
 
 	# Update the apple variable
-	def dropApple():
+	def dropApple(self):
 		done = False
 		while not done:
-			x = randint(len(field))
-			y = randint(len(field[0]))
-			if field[x][y] == EMPTY:
-				apple = (x, y)
+			x = randint(0, self.size - 1)
+			y = randint(0, self.size - 1)
+			if self.field[x][y] == self.EMPTY:
+				self.apple = (x, y)
 				done = True
 
 	# Move the snake given a direction.
-	def move(dir):
-		head = snake[0]
+	def move(self, dir):
+		head = self.snake[0]
 		moveTo = head
 		if dir == "LEFT":
 			if head[1] - 1 >= 0:
 				moveTo[1] -= 1
-				checkShift(moveTo)
+				self.checkShift(moveTo)
 			else:
-				gameOver()
+				self.gameOver()
 
 		elif dir == "RIGHT":
 			if head[1] + 1 < len(field[0]):
 				moveTo[1] += 1
-				checkShift(moveTo)
+				self.checkShift(moveTo)
 			else:
-				gameOver()
+				self.gameOver()
 
 		elif dir == "UP":
 			if head[0] - 1 >= 0:
 				moveTo[0] -= 1
-				checkShift(moveTo)
+				self.checkShift(moveTo)
 			else:
-				gameOver()
+				self.gameOver()
 
 		elif dir == "DOWN":
 			if head[0] + 1 < len(field):
 				moveTo[0] += 1
-				checkShift(moveTo)
+				self.checkShift(moveTo)
 			else:
-				gameOver()
+				self.gameOver()
 		else:
 			print("Invalid move direction: ", dir)
 
 		if not gameOver:
-			updateField()
+			self.updateField()
 
 	# Handles collisions w/ wall, snake, and apple
-	def checkShift(loc):
+	def checkShift(self, loc):
 		move = board[loc[0]][loc[1]]
 		if move == EMPTY:
-			shiftSnake(loc)
+			self.shiftSnake(loc)
 		elif move == APPLE:
-			eatApple(loc)
+			self.eatApple(loc)
 		else:
-			gameOver()
+			self.gameOver()
 
-	def shiftSnake(loc):
+	def shiftSnake(self, loc):
 		snake.append(0, loc)
 		# Remove the back of the snake
 		snake.remove(snake[snake(len) - 1])
 
-	def eatApple(loc):
+	def eatApple(self, loc):
 		snake.append(0, loc)
-		score += 1
-		dropApple()
+		self.score += 1
+		self.dropApple()
 
 	# Intentionally leaves the cause vague so the machine can learn it itself
-	def gameOver():
+	def gameOver(self):
 		gameOver = True
 
-	def printBoard():
-		dim = len(field)
-		print("Score: ", score)
-		for x in range(dim):
+	def printBoard(self):
+		print("Score: ", self.score)
+		for x in range(self.size):
 			row = ""
-			for y in range(dim):
-				row += field[x][y]
+			for y in range(self.size):
+				row += self.field[x][y] + " "
 			print(row)
