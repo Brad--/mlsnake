@@ -55,28 +55,29 @@ class Board:
 	def move(self, dir):
 		head = self.snake[0]
 		moveTo = head
-		if dir == "LEFT":
+		dir = dir.upper
+		if dir == "L":
 			if head[1] - 1 >= 0:
 				moveTo[1] -= 1
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "RIGHT":
+		elif dir == "R":
 			if head[1] + 1 < len(field[0]):
 				moveTo[1] += 1
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "UP":
+		elif dir == "U":
 			if head[0] - 1 >= 0:
 				moveTo[0] -= 1
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "DOWN":
+		elif dir == "D":
 			if head[0] + 1 < len(field):
 				moveTo[0] += 1
 				self.checkShift(moveTo)
