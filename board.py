@@ -55,61 +55,63 @@ class Board:
 	def move(self, dir):
 		head = self.snake[0]
 		moveTo = head
-		dir = dir.upper
+
+		dir = dir.upper()
 		if dir == "L":
 			if head[1] - 1 >= 0:
-				moveTo[1] -= 1
+				moveTo = (moveTo[0], moveTo[1] - 1)
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
 		elif dir == "R":
-			if head[1] + 1 < len(field[0]):
-				moveTo[1] += 1
+			if head[1] + 1 < len(self.field[0]):
+				moveTo = (moveTo[0], moveTo[1] + 1)
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
 		elif dir == "U":
 			if head[0] - 1 >= 0:
-				moveTo[0] -= 1
+				moveTo = (moveTo[0] - 1, moveTo[1])
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
 		elif dir == "D":
-			if head[0] + 1 < len(field):
-				moveTo[0] += 1
+			if head[0] + 1 < len(self.field):
+				moveTo = (moveTo[0] + 1, moveTo[1])
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 		else:
 			print("Invalid move direction: ", dir)
 
-		if not gameOver:
+		if not self.gameOver:
 			self.updateField()
 
 	# Handles collisions w/ wall, snake, and apple
 	def checkShift(self, loc):
-		move = board[loc[0]][loc[1]]
-		if move == EMPTY:
+		move = self.field[loc[0]][loc[1]]
+		if move == self.EMPTY:
 			self.shiftSnake(loc)
-		elif move == APPLE:
+		elif move == self.APPLE:
 			self.eatApple(loc)
 		else:
 			self.gameOver()
 
 	def shiftSnake(self, loc):
-		snake.append(0, loc)
-		# Remove the back of the snake
-		snake.remove(snake[snake(len) - 1])
+		self.snake = [loc] + self.snake[0:len(self.snake) - 1]
+		# self.snake.append(0, loc)
+		# # Remove the back of the snake
+		# self.snake.remove(self.snake[len(snake) - 1])
 
 	def eatApple(self, loc):
-		snake.append(0, loc)
+		self.snake = [loc] + self.snake[:]
+		# self.snake.append(0, loc)
 		self.score += 1
 		self.dropApple()
 
-	# Intentionally leaves the cause vague so the machine can learn it itself
 	def gameOver(self):
 		gameOver = True
 
