@@ -70,9 +70,9 @@ def run():
 	epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
 	nh = [5,5]
-	qnet = nn.NeuralNetwork([5] + nh + [1])
+	qnet = nn.NeuralNetwork([4] + nh + [1])
 	# Set each of the input ranges (There should be one for each X input)
-	qnet.setInputRanges(( (0, 100), (0, boardSize), (0, boardSize)))
+	qnet.setInputRanges(( (0, 100), (0, boardSize), (0, boardSize), (0, 4)))
 	
 	fig = plt.figure(figsize=(15,15))
 
@@ -82,13 +82,12 @@ def run():
 	for trial in range(nTrials):
 	    samples = makeSamples(qnet, nStepsPerTrial)
 
-	    ns = 4
+	    ns = 3
 	    na = 1
 	    # print(samples[1])
 	    X = samples[:, :ns+na]
 	    R = samples[:, ns+na:ns+na+1]
 	    nextX = samples[:, ns+na+1:]
-	    # print(nextX)
 	    nextQ = qnet.use(nextX)
 
 	    qnet.train(X, R + gamma * nextQ, nIterations = nSCGIterations)
@@ -100,13 +99,13 @@ def run():
 	    rtrace[trial] = np.mean(R)
 
 	    # if trial % (nTrials//10) == 0 or trial == nTrials-1:
-	        # plt.clf()
-	        # plotStatus(qnet, X, R, trial,epsilonTrace,rtrace)
-	        # testIt(qnet,10,500)
-	        # clear_output(wait=True)
-	        # display(fig);
-	        # plt.pause(0.01)
-
+	    #     plt.clf()
+	    #     plotStatus(qnet, X, R, trial,epsilonTrace,rtrace)
+	    #     testIt(qnet,10,500)
+	    #     clear_output(wait=True)
+	    #     display(fig);
+	    #     plt.pause(0.01)
+	print(rtrace)
 	# clear_output(wait=True)
 
 run()
