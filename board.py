@@ -56,29 +56,28 @@ class Board:
 		head = self.snake[0]
 		moveTo = head
 
-		dir = dir.upper()
-		if dir == "L":
+		if dir == 2 :
 			if head[1] - 1 >= 0:
 				moveTo = (moveTo[0], moveTo[1] - 1)
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "R":
+		elif dir == 3:
 			if head[1] + 1 < len(self.field[0]):
 				moveTo = (moveTo[0], moveTo[1] + 1)
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "U":
+		elif dir == 0:
 			if head[0] - 1 >= 0:
 				moveTo = (moveTo[0] - 1, moveTo[1])
 				self.checkShift(moveTo)
 			else:
 				self.gameOver()
 
-		elif dir == "D":
+		elif dir == 1:
 			if head[0] + 1 < len(self.field):
 				moveTo = (moveTo[0] + 1, moveTo[1])
 				self.checkShift(moveTo)
@@ -114,6 +113,10 @@ class Board:
 
 	def gameOver(self):
 		gameOver = True
+
+	def getState(self):
+		# return [self.score] + list(self.apple) + self.snake
+		return [self.score] + list(self.apple)
 
 	def printBoard(self):
 		print("Score: ", self.score)

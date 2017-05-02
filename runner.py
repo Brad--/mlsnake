@@ -8,7 +8,8 @@ import copy
 from board import Board
 # Game Runner & Reinforcement Controller
 
-validActions = np.array(['U', 'D', 'L', 'R'])
+validActionLetters = np.array(['U', 'D', 'L', 'R'])
+validActions = np.array([0, 1, 2, 3])
 boardSize = 10
 epsilon = 1
 
@@ -21,6 +22,7 @@ def nextStateAndReinforce(board, action):
 	deltaT = 0.1
 	scoreBeforeMove = board.score
 	board.move(action)
+
 	# reinforce
 	if board.score == scoreBeforeMove:
 		r = -.01
@@ -37,7 +39,7 @@ def policy(qnet, board, epsilon):
 	else:
 		# This might be really wrong, I haven't thought it through yet
 		# inputs = np.hstack(( np.tile(state, (validActions.shape[0], 1)), validActions.reshape((-1,1))))
-		inputs = np.hstack(( np.tile(board.score, (validActions.shape[0], 1)), validActions.reshape((-1,1))))
+		inputs = np.hstack(( np.tile(board.getState(), (validActions.shape[0], 1)), validActions.reshape((-1,1))))
 		qs = qnet.use(inputs)
 		actioni = np.argmax(qs)
 	return validActions[actioni]
@@ -51,8 +53,7 @@ def makeSamples(qnet, nSteps):
 		newState, r = nextStateAndReinforce(state, act)
 		newAct = policy(qnet, newState, epsilon)
 		
-		samples.append([state.score] + list(state.apple) + state.snake + [act, r] 
-			+ [newState.score] + list(newState.apple) + newState.snake + [newAct])
+		samples.append(state.getState() + [act, r] + newState.getState() + [newAct])
 
 		state = newState
 		oldact = act
@@ -60,6 +61,7 @@ def makeSamples(qnet, nSteps):
 	return np.array(samples)
 
 def run():
+	epsilon = 1
 	gamma = 0.999
 	nTrials = 300
 	nStepsPerTrial = 500 
@@ -68,24 +70,25 @@ def run():
 	epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
 	nh = [5,5]
-	qnet = nn.NeuralNetwork([3] + nh + [1])
-	qnet.setInputRanges(( (0, 10), (-3, 3), (-1,1)))
+	qnet = nn.NeuralNetwork([5] + nh + [1])
+	# Set each of the input ranges (There should be one for each X input)
+	qnet.setInputRanges(( (0, 100), (0, boardSize), (0, boardSize)))
 	
 	fig = plt.figure(figsize=(15,15))
 
 	epsilonTrace = np.zeros(nTrials)
 	rtrace = np.zeros(nTrials)
 
-	#End Variable Initialization block
-
 	for trial in range(nTrials):
 	    samples = makeSamples(qnet, nStepsPerTrial)
 
-	    ns = 2
+	    ns = 4
 	    na = 1
+	    # print(samples[1])
 	    X = samples[:, :ns+na]
 	    R = samples[:, ns+na:ns+na+1]
 	    nextX = samples[:, ns+na+1:]
+	    # print(nextX)
 	    nextQ = qnet.use(nextX)
 
 	    qnet.train(X, R + gamma * nextQ, nIterations = nSCGIterations)
@@ -96,15 +99,14 @@ def run():
 	    epsilonTrace[trial] = epsilon
 	    rtrace[trial] = np.mean(R)
 
-	    if trial % (nTrials//10) == 0 or trial == nTrials-1:
-	        plt.clf()
-	        plotStatus(qnet, X, R, trial,epsilonTrace,rtrace)
-	        testIt(qnet,10,500)
-	        clear_output(wait=True)
-	        display(fig);
-	        plt.pause(0.01)
+	    # if trial % (nTrials//10) == 0 or trial == nTrials-1:
+	        # plt.clf()
+	        # plotStatus(qnet, X, R, trial,epsilonTrace,rtrace)
+	        # testIt(qnet,10,500)
+	        # clear_output(wait=True)
+	        # display(fig);
+	        # plt.pause(0.01)
 
-	    # print('Trial',trial,'mean R',np.mean(R))
-	clear_output(wait=True)
+	# clear_output(wait=True)
 
 run()
