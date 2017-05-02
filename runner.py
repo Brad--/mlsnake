@@ -8,6 +8,10 @@ import copy
 from board import Board
 # Game Runner & Reinforcement Controller
 
+validActions = np.array(['U', 'D', 'L', 'R'])
+boardSize = 10
+epsilon = 1
+
 def initialState(size):
 	return Board(size)
 
@@ -46,16 +50,15 @@ def makeSamples(qnet, nSteps):
 	for iStep in range(nSteps):
 		newState, r = nextStateAndReinforce(state, act)
 		newAct = policy(qnet, newState, epsilon)
-		# Not sure about state.score
-		samples.append([state.score] + [act, r] + [newState.score] + [newAct])
+		
+		samples.append([state.score] + list(state.apple) + state.snake + [act, r] 
+			+ [newState.score] + list(newState.apple) + newState.snake + [newAct])
+
 		state = newState
 		oldact = act
 		act = newAct
 	return np.array(samples)
 
-validActions = np.array(['U', 'D', 'L', 'R'])
-boardSize = 10
-epsilon = 1
 def run():
 	gamma = 0.999
 	nTrials = 300
@@ -63,10 +66,11 @@ def run():
 	nSCGIterations = 30
 	finalEpsilon = 0.01
 	epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
-	#Net
+
 	nh = [5,5]
 	qnet = nn.NeuralNetwork([3] + nh + [1])
 	qnet.setInputRanges(( (0, 10), (-3, 3), (-1,1)))
+	
 	fig = plt.figure(figsize=(15,15))
 
 	epsilonTrace = np.zeros(nTrials)
