@@ -1,10 +1,12 @@
 from random import randint
+import math
 
 class Board:
 	'Stores information about the game board, such as the snake and apple positions'
 	SNAKE = "s"
 	APPLE = "a"
 	EMPTY = "."
+	OVER = "x"
 
 	field = []
 	snake = []
@@ -15,21 +17,20 @@ class Board:
 
 	# Create new Board
 	def __init__(self, board):
-		if isinstance(board, Board):
-			self.initInProgress(board)
-		else:
-			self.size = board
-			self.snake.append((0,0))
-			self.emptyField()
-			self.dropApple()
-			self.updateField()
+		self.size = board
+		mid = math.floor(self.size / 2)
+		self.snake = [(mid, mid)]
+		self.emptyField()
+		self.dropApple()
+		self.updateField()
 
-	def initInProgress(self, board) :
-		self.size = size;
-		self.field = board.field
-		self.snake = board.snake
-		self.score = board.score
-		self.apple = board.apple
+	def update(self, score, size, snake, apple, gameOver):
+		self.score = score
+		self.size = size
+		self.snake = snake
+		self.apple = apple
+		self.gameOver = gameOver
+		self.updateField()
 
 	def emptyField(self):
 		self.field = [[self.EMPTY for w in range(self.size)] for h in range(self.size)]
@@ -56,33 +57,37 @@ class Board:
 		head = self.snake[0]
 		moveTo = head
 
-		if dir == 2 :
-			if head[1] - 1 >= 0:
-				moveTo = (moveTo[0], moveTo[1] - 1)
-				self.checkShift(moveTo)
-			else:
-				self.gameOver()
-
-		elif dir == 3:
-			if head[1] + 1 < len(self.field[0]):
-				moveTo = (moveTo[0], moveTo[1] + 1)
-				self.checkShift(moveTo)
-			else:
-				self.gameOver()
-
-		elif dir == 0:
+		#Up
+		if dir == 0:
 			if head[0] - 1 >= 0:
 				moveTo = (moveTo[0] - 1, moveTo[1])
 				self.checkShift(moveTo)
 			else:
-				self.gameOver()
-
+				self.lose()
+		#Down
 		elif dir == 1:
-			if head[0] + 1 < len(self.field):
+			if head[0] + 1 < self.size:
 				moveTo = (moveTo[0] + 1, moveTo[1])
 				self.checkShift(moveTo)
 			else:
-				self.gameOver()
+				self.lose()
+		#Left
+		elif dir == 2 :
+			if head[1] - 1 >= 0:
+				moveTo = (moveTo[0], moveTo[1] - 1)
+				self.checkShift(moveTo)
+			else:
+				self.lose()
+		#Right
+		elif dir == 3:
+			if head[1] + 1 < self.size:
+				moveTo = (moveTo[0], moveTo[1] + 1)
+				self.checkShift(moveTo)
+			else:
+				self.lose()
+
+		
+
 		else:
 			print("Invalid move direction: ", dir)
 
@@ -97,29 +102,33 @@ class Board:
 		elif move == self.APPLE:
 			self.eatApple(loc)
 		else:
-			self.gameOver()
+			self.lose()
 
 	def shiftSnake(self, loc):
-		self.snake = [loc] + self.snake[0:len(self.snake) - 1]
-		# self.snake.append(0, loc)
-		# # Remove the back of the snake
-		# self.snake.remove(self.snake[len(snake) - 1])
+		self.snake = [loc] + self.snake[:len(self.snake) - 1]
+		self.updateField()
 
 	def eatApple(self, loc):
-		self.snake = [loc] + self.snake[:]
-		# self.snake.append(0, loc)
+		self.snake = [loc] + self.snake[:len(self.snake) - 1] # Don't extend the snake because it doesn't seem to be very good at adapting
 		self.score += 1
 		self.dropApple()
 
-	def gameOver(self):
-		gameOver = True
+	def lose(self):
+		# print("Game Over")
+		self.gameOver = True
 
 	def getState(self):
 		# return [self.score] + list(self.apple) + self.snake
-		return [self.score] + list(self.apple)
+		return [self.score] + list(self.apple) + list(self.snake[0])
+
+	# Minimum number of moves from the head of the snake to the apple
+	def getDistance(self):
+		return abs(apple[0] - snake[0][0]) + abs(apple[1] - snake[0][1])
 
 	def printBoard(self):
 		print("Score: ", self.score)
+		if self.gameOver == True:
+			print("Game Over.")
 		for x in range(self.size):
 			row = ""
 			for y in range(self.size):
