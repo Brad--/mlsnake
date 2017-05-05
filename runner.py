@@ -32,15 +32,20 @@ def nextStateAndReinforce(board, action):
     # reinforce
     if distBeforeMove <= board.getDistance():
         # r = .1 # Not enough
-        r = .5 # moved towards the apple
+        # r = 1 # moved towards the apple
+        r = 10 # beef it up
     else:
-        r = -.1 # moved away from the apple
+        # r = -.1 # moved away from the apple
+        # r = -.2 # beef it up? down?
+        r = -.4 # More and or less beef. Attempts: 11 moves, 7 moves, 8 moves (With 10, 10)
 
     if board.score > scoreBeforeMove:
-        r = 1 # got an apple
+        # r = 1 # got an apple
+        r = 10
 
     if board.gameOver == True:
         r = -1
+        # r = -10 # No noticable difference between -1 & 10 tbh
 
     return board, r
 
@@ -89,10 +94,10 @@ def run():
     finalEpsilon = 0.01
     epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
-    # nh = [10, 10]
+    nh = [10, 10] # Attempts: 11 moves, 7 moves, 8 moves
     # nh = [5,5]
     # Stats Exchange recommended the # hidden nodes equals the mean of the inputs and outputs
-    nh = [4, 4]
+    # nh = [4, 4] # Attempts: 4, 8, 5
 
     qnet = nn.NeuralNetwork([7] + nh + [1])
     bounds = (0, boardSize)
