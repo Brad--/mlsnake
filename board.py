@@ -119,11 +119,38 @@ class Board:
 
 	def getState(self):
 		# return [self.score] + list(self.apple) + self.snake
-		return [self.score] + list(self.apple) + list(self.snake[0])
+		#Up down left right
+		if self.snake[0][0] == 0:
+			adjTop = 1
+		else:
+			adjTop = 0
+
+		if self.snake[0][0] == self.size - 1:
+			adjBot = 1
+		else:
+			adjBot = 0
+
+		if self.snake[0][1] == 0:
+			adjLeft = 1
+		else:
+			adjLeft = 0
+
+		if self.snake[0][1] == self.size - 1:
+			adjRight = 1
+		else:
+			adjRight = 0
+
+		# Boolean isAdjacentToTheWall for up, down, left, right, dist x, y
+
+		x, y = self.getDistanceXY()
+		return [adjTop, adjBot, adjLeft, adjRight, x, y]
 
 	# Minimum number of moves from the head of the snake to the apple
 	def getDistance(self):
-		return abs(apple[0] - snake[0][0]) + abs(apple[1] - snake[0][1])
+		return abs(self.apple[0] - self.snake[0][0]) + abs(self.apple[1] - self.snake[0][1])
+
+	def getDistanceXY(self):
+		return abs(self.apple[0] - self.snake[0][0]), abs(self.apple[1] - self.snake[0][1])
 
 	def printBoard(self):
 		print("Score: ", self.score)

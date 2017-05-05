@@ -8,6 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
 validActions = np.array([0, 1, 2, 3])
+validActionLetters = np.array(['U', 'D', 'L', 'R'])
 
 def displayGame(qs, boardSize):
     actsiByState = np.argmax(qs.reshape((len(validActions),-1)),axis=0)
@@ -18,15 +19,21 @@ def displayGame(qs, boardSize):
 
     board = Board(boardSize)
     board.printBoard()
-    for i in range(40):
-        print("Move: ", actsiByState[i])
-        board.move(actsiByState[i])
-        board.printBoard()
+    print()
 
+    # Print "Ideal game"
+    for i in range(40):
+        if not board.gameOver:
+            print("Move: ", validActionLetters[actsiByState[i]])
+            board.move(actsiByState[i])
+            board.printBoard()
+            print()
+
+    # Print just the moves made
     for i in range(4):
         row = ""
         for j in range(10):
-            row += str(actsiByState[(i * 10) + j ]) + ", "
+            row += str(validActionLetters[actsiByState[(i * 10) + j ] ]) + ", "
         print(row)
 
 def plotStatus(qnet, X, R, trial, epsilonTrace, rtrace, qs):

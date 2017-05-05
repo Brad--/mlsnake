@@ -17,7 +17,7 @@ epsilon = 1
 
 def initialState(size):
     return Board(size)
-
+    
 def nextStateAndReinforce(board, action):
     # nextState
     temp = Board(5)
@@ -30,10 +30,11 @@ def nextStateAndReinforce(board, action):
     board.move(action)
 
     # reinforce
-    if distBeforeMove < board.getDistance():
-        r = .1 # moved towards the apple
+    if distBeforeMove <= board.getDistance():
+        # r = .1 # Not enough
+        r = .5 # moved towards the apple
     else:
-        r = 0 # moved away from the apple
+        r = -.1 # moved away from the apple
 
     if board.score > scoreBeforeMove:
         r = 1 # got an apple
@@ -51,6 +52,8 @@ def policy(qnet, board, epsilon):
             (validActions.shape[0], 1)), validActions.reshape((-1,1))))
         qs = qnet.use(inputs)
         actioni = np.argmax(qs)
+
+    # print(validActions[actioni])
     return validActions[actioni]
 
 def makeSamples(qnet, nSteps):
@@ -75,21 +78,30 @@ def makeSamples(qnet, nSteps):
 def run():
     epsilon = 1
     gamma = 0.999
+    amp = 4
+    nTrials = 300 * amp
+    nStepsPerTrial = 500 * amp
     # nTrials = 300
     # nStepsPerTrial = 500
-    # nTrials = 300
-    # nStepsPerTrial = 500
-    nTrials = 800
-    nStepsPerTrial = 1000
+    # nTrials = 800
+    # nStepsPerTrial = 1000
     nSCGIterations = 30
     finalEpsilon = 0.01
     epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
-    nh = [5,5]
-    qnet = nn.NeuralNetwork([6] + nh + [1])
+    # nh = [10, 10]
+    # nh = [5,5]
+    # Stats Exchange recommended the # hidden nodes equals the mean of the inputs and outputs
+    nh = [4, 4]
+
+    qnet = nn.NeuralNetwork([7] + nh + [1])
     bounds = (0, boardSize)
+    adj = (0, 1)
+
     # Set each of the input ranges (There should be one for each X input)
-    qnet.setInputRanges(( (0, 100), bounds, bounds, bounds, bounds, (0, 4)))
+    # qnet.setInputRanges(( (0, 40), bounds, bounds, bounds, bounds, (0, 4) ))
+    # Boolean isAdjacentToTheWall for up, down, left, right, dist x, y
+    qnet.setInputRanges(( adj, adj, adj, adj, bounds, bounds, (0, 3) ))
 
     epsilonTrace = np.zeros(nTrials)
     rtrace = np.zeros(nTrials)
@@ -97,7 +109,7 @@ def run():
     for trial in range(nTrials):
         samples = makeSamples(qnet, nStepsPerTrial)
 
-        ns = 5
+        ns = 6
         na = 1
         X = samples[:, :ns+na]
         R = samples[:, ns+na:ns+na+1]
