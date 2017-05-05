@@ -140,6 +140,7 @@ class Board:
 		else:
 			adjRight = 0
 
+
 		# Boolean isAdjacentToTheWall for up, down, left, right, dist x, y
 
 		x, y = self.getDistanceXY()

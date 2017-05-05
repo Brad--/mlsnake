@@ -21,20 +21,19 @@ def displayGame(qs, boardSize):
     board.printBoard()
     print()
 
+    moves = []
     # Print "Ideal game"
     for i in range(40):
         if not board.gameOver:
-            print("Move: ", validActionLetters[actsiByState[i]])
+            move = validActionLetters[actsiByState[i]]
+            print("Move: ", move)
+            moves.append(move)
             board.move(actsiByState[i])
             board.printBoard()
             print()
 
-    # Print just the moves made
-    for i in range(4):
-        row = ""
-        for j in range(10):
-            row += str(validActionLetters[actsiByState[(i * 10) + j ] ]) + ", "
-        print(row)
+    print(moves)
+
 
 def plotStatus(qnet, X, R, trial, epsilonTrace, rtrace, qs):
     fig = plt.figure(figsize=(15,15))

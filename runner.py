@@ -10,6 +10,9 @@ import plot
 # %matplotlib inline # Uncomment this for the notebook
 # Game Runner & Reinforcement Controller
 
+# http://cs229.stanford.edu/proj2016spr/report/060.pdf
+# Lots of cool stuff ^
+
 validActionLetters = np.array(['U', 'D', 'L', 'R'])
 validActions = np.array([0, 1, 2, 3])
 boardSize = 5 # 5 x 5
@@ -26,26 +29,39 @@ def nextStateAndReinforce(board, action):
 
     deltaT = 0.1
     scoreBeforeMove = board.score
+    gameOverBeforeMove = board.gameOver
     distBeforeMove = board.getDistance()
     board.move(action)
 
-    # reinforce
-    if distBeforeMove <= board.getDistance():
-        # r = .1 # Not enough
-        # r = 1 # moved towards the apple
-        r = 10 # beef it up
+    # # reinforce
+    # if distBeforeMove <= board.getDistance():
+    #     # r = .1 # Not enough
+    #     # r = 1 # moved towards the apple
+    #     # r = 10 # beef it up 8, 8, 6
+    #     r = 
+    # else:
+    #     # r = -.1 # moved away from the apple
+    #     # r = -.2 # beef it up? down?
+    #     r = -.4 # More and or less beef. Attempts: 11 moves, 7 moves, 8 moves (With 10, 10)
+
+    # if board.score > scoreBeforeMove:
+    #     # r = 1 # got an apple
+    #     r = 10
+
+    # if board.gameOver == True:
+    #     r = -1
+    #     # r = -10 # No noticable difference between -1 & 10 tbh
+
+    # Trying the Stanford paper numbers
+    # 6, 
+    if board.gameOver != gameOverBeforeMove:
+        r = -100
+    elif board.score > scoreBeforeMove:
+        r = 500
+    elif board.gameOver == True and board.gameOver == gameOverBeforeMove:
+        r = 0 # Nothing changed, the game was over
     else:
-        # r = -.1 # moved away from the apple
-        # r = -.2 # beef it up? down?
-        r = -.4 # More and or less beef. Attempts: 11 moves, 7 moves, 8 moves (With 10, 10)
-
-    if board.score > scoreBeforeMove:
-        # r = 1 # got an apple
-        r = 10
-
-    if board.gameOver == True:
-        r = -1
-        # r = -10 # No noticable difference between -1 & 10 tbh
+        r = -10 # More moves is bad so punish bad moves
 
     return board, r
 
@@ -83,14 +99,29 @@ def makeSamples(qnet, nSteps):
 def run():
     epsilon = 1
     gamma = 0.999
-    amp = 4
+    # amp = 4 # Attempts: 6, 6, 6 (Works really well with the stanford method)
+    # amp = 10 # mask off (This one actually sucked)
+    
+    # amp = 1 # Attempts: 4, 10, 4, 16
+    # amp = 2 # Try a middle ground. Attempts: 6, 6, 6
+    
+    amp = 10 # After reducing nStepsPerTrial to a reasonable amount of moves the game could make
     nTrials = 300 * amp
-    nStepsPerTrial = 500 * amp
-    # nTrials = 300
-    # nStepsPerTrial = 500
+    nStepsPerTrial = 40
+
+    # Attempts: 
+    # amp = 20
+    # amp = 4
+    # nTrials = 300 * amp
+    # nStepsPerTrial = nTrials # 500 moves takes a long time and is unreasonable
+
+
     # nTrials = 800
     # nStepsPerTrial = 1000
+
     nSCGIterations = 30
+    # nSCGIterations = 30
+    # nSCGIterations = 300 # 6, 4 
     finalEpsilon = 0.01
     epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
@@ -105,13 +136,16 @@ def run():
 
     # Set each of the input ranges (There should be one for each X input)
     # qnet.setInputRanges(( (0, 40), bounds, bounds, bounds, bounds, (0, 4) ))
-    # Boolean isAdjacentToTheWall for up, down, left, right, dist x, y
+
+    # isAdjacentToTheWall for up, down, left, right, dist x, y
     qnet.setInputRanges(( adj, adj, adj, adj, bounds, bounds, (0, 3) ))
 
     epsilonTrace = np.zeros(nTrials)
     rtrace = np.zeros(nTrials)
     trial = 0
     for trial in range(nTrials):
+        if trial % 100 == 0:
+            print("Running trial " + str(trial), flush=True)
         samples = makeSamples(qnet, nStepsPerTrial)
 
         ns = 6
