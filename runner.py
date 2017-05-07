@@ -57,18 +57,20 @@ def nextStateAndReinforce(board, action):
         # r = 1000
     elif distBeforeMove <= board.getDistance():
         # r = 500
-        r = 10
+        r = 50
         # r = 100
     else:
+        # r = -10
         r = -10
+
     if board.gameOver != gameOverBeforeMove:
         # r = -5000
-        r = -500
+        r = -5000
 
     # I'm not sure if this should be 0, or just let it fall into -10.\
     if board.gameOver == True and board.gameOver == gameOverBeforeMove:
         r = 0
-        # r = -1
+        # r = -10
 
     return board, r
 
@@ -95,8 +97,8 @@ def makeSamples(qnet, nSteps):
 		
         samples.append(state.getState() + [act, r] + newState.getState() + [newAct])
 
-        # if newState.gameOver == True:
-        #     return np.array(samples)
+        if newState.gameOver == True:
+            return np.array(samples)
 
         state = newState
         oldact = act
@@ -104,7 +106,9 @@ def makeSamples(qnet, nSteps):
     return np.array(samples)
 
 def run():
-    epsilon = 1
+    # epsilon = 1
+    # epsilon = .5
+    epsilon = .95
     # gamma = 1
     gamma = 0.999 # Nothing consistent with the other two
     # gamma = 0.1
@@ -123,9 +127,9 @@ def run():
 
     # I'm pretty sure this is the variable I've been meaning to tinker with the whole time tbh
     # nSCGIterations = 10
-    nSCGIterations = 100
-    # nSCGIterations = 1000 # This works really well
-    # nSCGIterations = 10000 # mask off
+    # nSCGIterations = 100
+    nSCGIterations = 1000 # This works really well
+    # nSCGIterations = 10000 # mask off (11!!, 3 :(, 3)
     # nSCGIterations = 100000 
 
     # Attempts: 
@@ -135,7 +139,9 @@ def run():
     # nStepsPerTrial = nTrials # 500 moves takes a long time and is unreasonable
 
 
-    nTrials = 800
+    # nTrials = 10000
+    nTrials = 100
+    # nTrials = 800
     nStepsPerTrial = 500
     # nStepsPerTrial = 1000
 
@@ -146,7 +152,8 @@ def run():
     # finalEpsilon = .1
     epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
-    nh = [10, 10] # Attempts: 11 moves, 7 moves, 8 moves
+    nh = [15, 15]
+    # nh = [10, 10] # Attempts: 11 moves, 7 moves, 8 moves
     # nh = [5,5]
     # Stats Exchange recommended the # hidden nodes equals the mean of the inputs and outputs
     # nh = [4, 4] # Attempts: 4, 8, 5
@@ -191,11 +198,11 @@ def run():
     # clear_output(wait=True)
     # qs = qnet.use(np.array([[s,0,0,0,0,0,a] 
     #     for a in validActions for s in range(11)]))
-    # qUse = [[s1, s2, s3, s4, x, y, a] for a in validActions 
-    # for s1 in range(2) for s2 in range(2) for s3 in range(2) for s4 in range(2) 
-    # for x in range(boardSize - 1) for y in range(boardSize - 1)]
-    # qs = qnet.use(np.array(qUse))
-    # plot.displayGame(qs, boardSize)
-    plot.displayGame(nextQ, boardSize)
+    qUse = [[s1, s2, s3, s4, x, y, a] for a in validActions 
+    for s1 in range(2) for s2 in range(2) for s3 in range(2) for s4 in range(2) 
+    for x in range(boardSize - 1) for y in range(boardSize - 1)]
+    qs = qnet.use(np.array(qUse))
+    plot.displayGame(qs, boardSize)
+    # plot.displayGame(nextQ, boardSize)
 
 run()
