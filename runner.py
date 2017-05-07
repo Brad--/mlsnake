@@ -45,30 +45,32 @@ def nextStateAndReinforce(board, action):
     # else:
     #     r = -10 # More moves is bad so punish non-scoring moves
 
-    #The 'Just Don't Die' method
-    # if board.gameOver == True:
-    #     r = -100000
-    # else:
-    #     r = 100
+    # The 'Just Don't Die' method
+    if board.gameOver == True:
+        r = -10
+    elif board.score > scoreBeforeMove:
+        r = 100 # Get the apple
+    else:
+        r = 10
 
     # Original method
-    if board.score > scoreBeforeMove:
-        r = 100 # got an apple
-        # r = 1000
-    elif distBeforeMove <= board.getDistance():
-        # r = 500
-        r = 10
-        # r = 100
-    else:
-        r = -10
-    if board.gameOver != gameOverBeforeMove:
-        # r = -5000
-        r = -500
+    # if board.score > scoreBeforeMove:
+    #     r = 100 # got an apple
+    #     # r = 1000
+    # elif distBeforeMove <= board.getDistance():
+    #     # r = 500
+    #     r = 10
+    #     # r = 100
+    # else:
+    #     r = -10
+    # if board.gameOver != gameOverBeforeMove:
+    #     # r = -5000
+    #     r = -500
 
-    # I'm not sure if this should be 0, or just let it fall into -10.\
-    if board.gameOver == True and board.gameOver == gameOverBeforeMove:
-        r = 0
-        # r = -1
+    # # I'm not sure if this should be 0, or just let it fall into -10.\
+    # if board.gameOver == True and board.gameOver == gameOverBeforeMove:
+    #     r = 0
+    #     # r = -1
 
     return board, r
 
@@ -136,7 +138,8 @@ def run():
 
 
     nTrials = 800
-    nStepsPerTrial = 500
+    nStepsPerTrial = 250
+    # nStepsPerTrial = 500
     # nStepsPerTrial = 1000
 
     # nSCGIterations = 30
@@ -151,7 +154,7 @@ def run():
     # Stats Exchange recommended the # hidden nodes equals the mean of the inputs and outputs
     # nh = [4, 4] # Attempts: 4, 8, 5
 
-    qnet = nn.NeuralNetwork([7] + nh + [1])
+    qnet = nn.NeuralNetwork([5] + nh + [1])
     bounds = (0, boardSize)
     adj = (0, 1)
 
@@ -159,7 +162,7 @@ def run():
     # qnet.setInputRanges(( (0, 40), bounds, bounds, bounds, bounds, (0, 4) ))
 
     # isAdjacentToTheWall for up, down, left, right, dist x, y
-    qnet.setInputRanges(( adj, adj, adj, adj, bounds, bounds, (0, 3) ))
+    qnet.setInputRanges(( adj, adj, adj, adj, (0, 3) ))
 
     epsilonTrace = np.zeros(nTrials)
     rtrace = np.zeros(nTrials)
@@ -169,7 +172,7 @@ def run():
             print("Running trial " + str(trial), flush=True)
         samples = makeSamples(qnet, nStepsPerTrial)
 
-        ns = 6
+        ns = 4
         na = 1
         X = samples[:, :ns+na]
         R = samples[:, ns+na:ns+na+1]
@@ -191,11 +194,10 @@ def run():
     # clear_output(wait=True)
     # qs = qnet.use(np.array([[s,0,0,0,0,0,a] 
     #     for a in validActions for s in range(11)]))
-    # qUse = [[s1, s2, s3, s4, x, y, a] for a in validActions 
-    # for s1 in range(2) for s2 in range(2) for s3 in range(2) for s4 in range(2) 
-    # for x in range(boardSize - 1) for y in range(boardSize - 1)]
-    # qs = qnet.use(np.array(qUse))
-    # plot.displayGame(qs, boardSize)
-    plot.displayGame(nextQ, boardSize)
+    qUse = [[s1, s2, s3, s4, a] for a in validActions 
+    for s1 in range(2) for s2 in range(2) for s3 in range(2) for s4 in range(2)]
+    qs = qnet.use(np.array(qUse))
+    plot.displayGame(qs, boardSize)
+    # plot.displayGame(nextQ, boardSize)
 
 run()

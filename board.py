@@ -146,8 +146,8 @@ class Board:
 
 		# Boolean isAdjacentToTheWall for up, down, left, right, dist x, y
 
-		x, y = self.getDistanceXY()
-		return [adjTop, adjBot, adjLeft, adjRight, x, y]
+		# x, y = self.getDistanceXY()
+		return [adjTop, adjBot, adjLeft, adjRight]
 
 	# Minimum number of moves from the head of the snake to the apple
 	def getDistance(self):
