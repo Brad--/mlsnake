@@ -58,14 +58,17 @@ def nextStateAndReinforce(board, action):
     elif distBeforeMove <= board.getDistance():
         # r = 500
         r = 10
+        # r = 100
     else:
         r = -10
     if board.gameOver != gameOverBeforeMove:
         # r = -5000
         r = -500
 
+    # I'm not sure if this should be 0, or just let it fall into -10.\
     if board.gameOver == True and board.gameOver == gameOverBeforeMove:
         r = 0
+        # r = -1
 
     return board, r
 
@@ -133,7 +136,8 @@ def run():
 
 
     nTrials = 800
-    nStepsPerTrial = 1000
+    nStepsPerTrial = 500
+    # nStepsPerTrial = 1000
 
     # nSCGIterations = 30
     # nSCGIterations = 100
