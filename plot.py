@@ -23,7 +23,8 @@ def displayGame(qs, boardSize):
 
     moves = []
     # Print "Ideal game"
-    for i in range(40):
+    # for i in range(40):
+    for i in range(len(actsiByState) - 1):
         if not board.gameOver:
             move = validActionLetters[actsiByState[i]]
             print("Move: ", move)
@@ -31,7 +32,10 @@ def displayGame(qs, boardSize):
             board.move(actsiByState[i])
             board.printBoard()
             print()
+        # else:
+        #     moves.append("X")
 
+    print(str(len(moves)) + " moves")
     print(moves)
 
 

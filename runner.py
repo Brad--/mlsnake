@@ -15,7 +15,10 @@ import plot
 
 validActionLetters = np.array(['U', 'D', 'L', 'R'])
 validActions = np.array([0, 1, 2, 3])
-boardSize = 5 # 5 x 5
+# boardSize = 3
+# boardSize = 4
+boardSize = 5
+# boardSize = 10
 epsilon = 1
 
 def initialState(size):
@@ -23,45 +26,46 @@ def initialState(size):
     
 def nextStateAndReinforce(board, action):
     # nextState
-    temp = Board(5)
+    temp = Board(boardSize)
     temp.update(board.score, board.size, board.snake, board.apple, board.gameOver)
     board = temp
 
-    deltaT = 0.1
     scoreBeforeMove = board.score
     gameOverBeforeMove = board.gameOver
     distBeforeMove = board.getDistance()
     board.move(action)
 
-    # # reinforce
-    # if distBeforeMove <= board.getDistance():
-    #     # r = .1 # Not enough
-    #     # r = 1 # moved towards the apple
-    #     # r = 10 # beef it up 8, 8, 6
-    #     r = 
-    # else:
-    #     # r = -.1 # moved away from the apple
-    #     # r = -.2 # beef it up? down?
-    #     r = -.4 # More and or less beef. Attempts: 11 moves, 7 moves, 8 moves (With 10, 10)
-
-    # if board.score > scoreBeforeMove:
-    #     # r = 1 # got an apple
-    #     r = 10
-
-    # if board.gameOver == True:
-    #     r = -1
-    #     # r = -10 # No noticable difference between -1 & 10 tbh
-
     # Trying the Stanford paper numbers
-    # 6, 
-    if board.gameOver != gameOverBeforeMove:
-        r = -100
-    elif board.score > scoreBeforeMove:
-        r = 500
-    elif board.gameOver == True and board.gameOver == gameOverBeforeMove:
-        r = 0 # Nothing changed, the game was over
+    # if board.gameOver == True and board.gameOver != gameOverBeforeMove:
+    #     r = -100
+    # elif board.score > scoreBeforeMove:
+    #     r = 500
+    # # elif board.gameOver == True and board.gameOver == gameOverBeforeMove:
+    # #     r = 0 # Nothing changed, the game was over
+    # else:
+    #     r = -10 # More moves is bad so punish non-scoring moves
+
+    #The 'Just Don't Die' method
+    # if board.gameOver == True:
+    #     r = -100000
+    # else:
+    #     r = 100
+
+    # Original method
+    if board.score > scoreBeforeMove:
+        r = 100 # got an apple
+        # r = 1000
+    elif distBeforeMove <= board.getDistance():
+        # r = 500
+        r = 10
     else:
-        r = -10 # More moves is bad so punish bad moves
+        r = -10
+    if board.gameOver != gameOverBeforeMove:
+        # r = -5000
+        r = -500
+
+    if board.gameOver == True and board.gameOver == gameOverBeforeMove:
+        r = 0
 
     return board, r
 
@@ -98,16 +102,28 @@ def makeSamples(qnet, nSteps):
 
 def run():
     epsilon = 1
-    gamma = 0.999
-    # amp = 4 # Attempts: 6, 6, 6 (Works really well with the stanford method)
-    # amp = 10 # mask off (This one actually sucked)
+    # gamma = 1
+    gamma = 0.999 # Nothing consistent with the other two
+    # gamma = 0.1
     
-    # amp = 1 # Attempts: 4, 10, 4, 16
+    amp = 1 # Attempts: 4, 10, 4, 16
     # amp = 2 # Try a middle ground. Attempts: 6, 6, 6
-    
-    amp = 10 # After reducing nStepsPerTrial to a reasonable amount of moves the game could make
-    nTrials = 300 * amp
-    nStepsPerTrial = 40
+    # amp = 10 # Attempts: 6, 6, 6 (Works really well with the stanford method)
+    # amp = 1000
+    # amp = 10000
+    # amp = 100 # After reducing nStepsPerTrial to a reasonable amount of moves the game could make
+    # nTrials = 100 * amp
+    # nTrials = 100 * amp
+    # nStepsPerTrial = 40
+    # nStepsPerTrial = 1000
+    # nStepsPerTrial = 100
+
+    # I'm pretty sure this is the variable I've been meaning to tinker with the whole time tbh
+    # nSCGIterations = 10
+    nSCGIterations = 100
+    # nSCGIterations = 1000 # This works really well
+    # nSCGIterations = 10000 # mask off
+    # nSCGIterations = 100000 
 
     # Attempts: 
     # amp = 20
@@ -116,13 +132,14 @@ def run():
     # nStepsPerTrial = nTrials # 500 moves takes a long time and is unreasonable
 
 
-    # nTrials = 800
-    # nStepsPerTrial = 1000
+    nTrials = 800
+    nStepsPerTrial = 1000
 
-    nSCGIterations = 30
     # nSCGIterations = 30
-    # nSCGIterations = 300 # 6, 4 
+    # nSCGIterations = 100
     finalEpsilon = 0.01
+    # finalEpsilon = 0.001
+    # finalEpsilon = .1
     epsilonDecay = np.exp(np.log(finalEpsilon)/(nTrials)) 
 
     nh = [10, 10] # Attempts: 11 moves, 7 moves, 8 moves
@@ -144,7 +161,7 @@ def run():
     rtrace = np.zeros(nTrials)
     trial = 0
     for trial in range(nTrials):
-        if trial % 100 == 0:
+        if trial % 10 == 0:
             print("Running trial " + str(trial), flush=True)
         samples = makeSamples(qnet, nStepsPerTrial)
 
@@ -168,6 +185,13 @@ def run():
 
     # plot.plotStatus(qnet, X, R, trial,epsilonTrace,rtrace, validActions, nextQ)
     # clear_output(wait=True)
+    # qs = qnet.use(np.array([[s,0,0,0,0,0,a] 
+    #     for a in validActions for s in range(11)]))
+    # qUse = [[s1, s2, s3, s4, x, y, a] for a in validActions 
+    # for s1 in range(2) for s2 in range(2) for s3 in range(2) for s4 in range(2) 
+    # for x in range(boardSize - 1) for y in range(boardSize - 1)]
+    # qs = qnet.use(np.array(qUse))
+    # plot.displayGame(qs, boardSize)
     plot.displayGame(nextQ, boardSize)
 
 run()

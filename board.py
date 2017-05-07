@@ -19,8 +19,9 @@ class Board:
 	def __init__(self, board):
 		self.size = board
 		mid = math.floor(self.size / 2)
-		self.snake = [(mid, mid)]
 		self.emptyField()
+		self.snake = [(mid, mid)]
+		self.field[mid][mid] = self.SNAKE 
 		self.dropApple()
 		self.updateField()
 
@@ -51,6 +52,8 @@ class Board:
 			if self.field[x][y] == self.EMPTY:
 				self.apple = (x, y)
 				done = True
+
+		self.updateField()
 
 	# Move the snake given a direction.
 	def move(self, dir):
